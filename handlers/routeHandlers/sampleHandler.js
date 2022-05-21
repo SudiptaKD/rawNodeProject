@@ -7,7 +7,7 @@
 // module scaffolding
 const handler = {};
 
-handler.sampleHandler = () => {
+handler.sampleHandler = (requestProperties, callback) => {
     console.log('sample Handle')
 }
 
