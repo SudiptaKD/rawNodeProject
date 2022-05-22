@@ -34,16 +34,6 @@ handler.handleReqRes = (req, res) => {
 
     //handlers
     const chosenHandler = routes[trimmedPath] ? routes[trimmedPath] : NotFoundHandler;
-    chosenHandler(requestProperties, (statusCode, payload)=> {
-        statusCode = typeof(statusCode) === 'number' ? statusCode : 500;
-        payload = typeof(payload)=== "object" ? payload : {};
-
-        const payloadString = JSON.stringify(payload);
-
-        // return the response
-        res.writeHead(statusCode);
-        res.end(payloadString); 
-    })
 
     //get body with stream
     const decoder = new StringDecoder('utf-8');
@@ -54,9 +44,19 @@ handler.handleReqRes = (req, res) => {
 
     req.on('end', ()=> {
         realData += decoder.end(); 
-        console.log(realData)
+        // handler Function
+        chosenHandler(requestProperties, (statusCode, payload)=> {
+            statusCode = typeof(statusCode) === 'number' ? statusCode : 500;
+            payload = typeof(payload)=== "object" ? payload : {};
+    
+            const payloadString = JSON.stringify(payload);
+    
+            // return the response
+            res.writeHead(statusCode);
+            res.end(payloadString); 
+        })
 
-        //resposne handle
+        //resposne handle  
         res.end('hello');
     })   
 }
