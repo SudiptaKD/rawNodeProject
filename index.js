@@ -13,11 +13,6 @@ const data = require('./lib/data')
 //App object - Module scuffolding
 const app ={};
 
-//testing file system
-data.delete('test', 'newFile', (err)=> {
-    console.log(err);
-} )
-
 // create server
 app.createServer = () => {
     const server = http.createServer(app.handleReqRes);
