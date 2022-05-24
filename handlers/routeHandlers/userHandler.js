@@ -5,7 +5,8 @@
 
 // dependencies
 const data = require('../../lib/data');
-const {hash} = require('../../helpers/utilities')
+const {hash} = require('../../helpers/utilities');
+const {parseJSON} = require('../../helpers/utilities');
 
 // module scaffolding
 const handler = {};
@@ -88,7 +89,31 @@ handler._users.post = (requestProperties, callback) => {
 };
 
 handler._users.get = (requestProperties, callback) => {
-    callback(200)
+    // check the phone number is valid
+    const phone = typeof(requestProperties.queryStringObject.phone) === 'string' 
+                    && requestProperties.queryStringObject.phone.trim().length === 11
+                    ? requestProperties.queryStringObject.phone : false;
+    if(phone){
+        //look up for user
+        data.read('users', phone, (err, user)=> {
+            // parse the user string from db then deep copy
+            const responseUser = {...parseJSON(user)};
+            if(!err && responseUser) {
+                delete responseUser.password;
+                callback(200, responseUser);
+                
+            }   else {
+                callback(404,{
+                    'error' : "Requested user was not found"
+                })
+            }
+        })
+
+    }   else {
+        callback(404,{
+            'error' : "Requested user was not found"
+        })
+    }
 };
 
 handler._users.put = (requestProperties, callback) => {
