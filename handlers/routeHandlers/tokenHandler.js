@@ -75,15 +75,114 @@ handler._token.post = (requestProperties, callback) => {
 };
 
 handler._token.get = (requestProperties, callback) => {
+    // check the id is valid
+    const id = typeof(requestProperties.queryStringObject.id) === 'string' 
+    && requestProperties.queryStringObject.id.trim().length === 20
+    ? requestProperties.queryStringObject.id : false;
+
+    if(id){
+        //look up for token
+        data.read('tokens', id, (err, tokenData)=> {
+            // parse the tokenData string from db then deep copy
+            const responseToken = {...parseJSON(tokenData)};
+            if(!err && responseToken) {
+                callback(200, responseToken);
+                
+                }   else {
+                    callback(404,{
+                        'error' : "Requested token was not found"
+                })
+            }
+        })
+
+    }   else {
+        callback(404,{
+        'error' : "Requested token not found"
+        })
+    }
    
 };
 
 handler._token.put = (requestProperties, callback) => {
-     
+    const id = typeof(requestProperties.body.id) === 'string' 
+            && requestProperties.body.id.trim().length === 20
+            ? requestProperties.body.id : false;
+
+    const extend = typeof(requestProperties.body.extend) === 'boolean' 
+                && requestProperties.body.extend === true
+                ? true : false;
+    
+    if (id && extend) {
+        data.read('tokens', id, (err, tokenData)=>{
+            let tokenObject = parseJSON(tokenData);
+            if(tokenObject.expires > Date.now() ) {
+                tokenObject.expires = Date.now() + 60 * 60 * 1000;
+
+                //store the updated tokenObject
+                data.update('tokens', id, tokenObject, (err1)=> {
+                    if(!err1) {
+                        callback(200, {
+                            "message" : " Token extended successfully!"
+                        })
+
+                    }   else {
+                        callback(500,{
+                            error : "There was an error in server side!"
+                            })
+                    }
+                })
+
+            } else {
+                callback(400,{
+                    error : "Token already expired!"
+                    })
+            }
+        })
+
+    } else {
+        callback(400, {
+            error : "There was a problem in your request"
+            })
+    }
+
 };
 
 handler._token.delete = (requestProperties, callback) => {
-  
+    // check the  token is valid
+    const id = typeof(requestProperties.queryStringObject.id) === 'string' 
+                && requestProperties.queryStringObject.id.trim().length === 20
+                ? requestProperties.queryStringObject.id : false;
+
+    if(id) {
+        // look up the token
+        data.read('tokens', id, (err, tokenData)=> {
+            if(!err && tokenData){
+            // delete file
+            data.delete('tokens', id , (err1)=> {
+                if(!err1) {
+                    callback(200, {
+                        "message": 'Token was successffully deleted!'
+                    })
+
+                } else {
+                    callback(500, {
+                        error: 'There was a server side error'
+                    })
+                }
+            })
+        
+        }   else {
+            callback(500, {
+                error: 'There was a server side error'
+            })
+        }
+    })
+
+    }   else {
+        callback(400, {
+        error: 'You have a problem in your request!'
+        })
+    }
 
 };
 
