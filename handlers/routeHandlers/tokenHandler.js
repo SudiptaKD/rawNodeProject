@@ -2,7 +2,6 @@
 * Title: Token handler
 * Description : Handler for Token related routes
 */
-
 // dependencies
 const data = require('../../lib/data');
 const {hash} = require('../../helpers/utilities');
