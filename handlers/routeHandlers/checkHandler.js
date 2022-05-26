@@ -290,6 +290,93 @@ handler._check.put = (requestProperties, callback) => {
 };
 
 handler._check.delete = (requestProperties, callback) => {
+    // check the id is valid
+    const id = typeof(requestProperties.queryStringObject.id) === 'string' 
+            && requestProperties.queryStringObject.id.trim().length === 20
+            ? requestProperties.queryStringObject.id : false;
+
+    if(id) {
+        //look up the checks
+        data.read('checks', id, (err, checkData)=>{
+            let userPhone = parseJSON(checkData).userPhone;
+            if(!err && checkData) {
+                let token = typeof(requestProperties.headersObject.token)==='string' 
+                            ? requestProperties.headersObject.token : false;
+                 
+                //verify the token
+                tokenHandler._token.verify(token, userPhone, (tokenIsValid)=> {
+                    if(tokenIsValid){
+                        // delete the check data
+                        data.delete('checks', id, (err1)=>{
+                            if(!err1) {
+                                data.read('users', userPhone, (err2, userData)=>{
+                                    let userObject = parseJSON(userData);
+                                    if(!err && userData) {
+                                        //  get the user checks from user
+                                        let userChecks = typeof(userObject.checks) ==='object'
+                                                        && userObject.checks instanceof Array
+                                                        ? userObject.checks : [];
+
+                                        // remove the checkID from checks in user
+                                        let checkPosition = userChecks.indexOf(id);
+
+                                        if(checkPosition >-1) {
+                                            userChecks.splice(checkPosition,1)
+
+                                            // resave the user data
+                                            userObject.checks = userChecks;
+                                            data.update('users', userPhone, userObject, (err3)=>{
+                                                if(!err3) {
+                                                    callback(200);
+
+                                                }   else {
+                                                        callback(500, {
+                                                            error : "There was a problem in the server side!"
+                                                        })
+                                                }
+
+                                            })
+                                        }   else {
+                                                callback(500, {
+                                                    error : "There was a problem in the server side!"
+                                                })
+                                        }                
+
+                                    }   else {
+                                            callback(500, {
+                                                error : "There was a problem in the server side!"
+                                            })
+                                    }
+                                })
+
+                            }   else {
+                                    callback(500, {
+                                        error : "There was a problem in the server side!"
+                                    })
+                            }
+                        })
+
+                    } else {
+                        callback(403, {
+                            error : "Authentication Problem!"
+                        })
+                    }
+                })
+
+            }   else {
+                    callback(500, {
+                        error : "There was a problem in the server side!"
+                    })
+            }
+        })
+
+    }   else {
+            callback(400, {
+                error : "You have a problem in your request"
+            })
+    }     
+    
+
 };
 
 module.exports = handler;
