@@ -10,6 +10,13 @@ const {handleReqRes} = require('./helpers/handleReqRes')
 const environment = require('./helpers/environments')
 const data = require('./lib/data')
 
+
+//test notification
+// const {sendTwilioSms} = require('./helpers/notifications')
+// sendTwilioSms('01521443834', "hello Sudipta", (err)=>{
+//     console.log("this is err ", err)
+// } )
+
 //App object - Module scuffolding
 const app ={};
 
