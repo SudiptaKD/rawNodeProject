@@ -1,16 +1,13 @@
 /*
-* Title: Uptime Monitor App
-* Description : A REST API to  monitor up/down of Links given by users
-
+* Title: Project Initial file
+* Description : Inotial file to start the  node server and workers 
 */
 
 //dependencies
-const http = require('http');
-const {handleReqRes} = require('./helpers/handleReqRes')
-const environment = require('./helpers/environments')
-const data = require('./lib/data')
+const server = require('./lib/server');
+const workers = require('./lib/workers')
 
-
+ 
 //test notification
 // const {sendTwilioSms} = require('./helpers/notifications')
 // sendTwilioSms('01521443834', "hello Sudipta", (err)=>{
@@ -20,16 +17,30 @@ const data = require('./lib/data')
 //App object - Module scuffolding
 const app ={};
 
-// create server
-app.createServer = () => {
-    const server = http.createServer(app.handleReqRes);
-    server.listen(environment.port, ()=>{
-        console.log(`listening to port ${environment.port}`)
-    })
+app.init = () => {
+    //start the server
+    server.init();
+
+    // start the workers
+    workers.init();
 }
 
-// handle request , response
-app.handleReqRes = handleReqRes;
+app.init();
 
-// start the server
-app.createServer();
+// export the app i ever needer
+module.exports =app;
+
+// // create server
+// app.createServer = () => {
+//     const server = http.createServer(app.handleReqRes);
+//     server.listen(environment.port, ()=>{
+//         console.log(`listening to port ${environment.port}`)
+//     })
+// }
+
+// // handle request , response
+// app.handleReqRes = handleReqRes;
+
+// // start the server
+// app.createServer();
+
