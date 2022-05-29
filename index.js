@@ -5,7 +5,7 @@
 
 //dependencies
 const server = require('./lib/server');
-const workers = require('./lib/workers')
+const worker = require('./lib/worker')
 
  
 //test notification
@@ -22,7 +22,7 @@ app.init = () => {
     server.init();
 
     // start the workers
-    workers.init();
+    worker.init();
 }
 
 app.init();
